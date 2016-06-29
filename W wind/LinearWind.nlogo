@@ -24,26 +24,27 @@ end
 to setup-patches
   ask patches[
     set wind 0
-    set plabel pycor
+    ;set plabel pycor
+    set plabel wind
     set pcolor green
   ]
 end
 
 to start_fire
-  set fire_list n-values 0[0]
+  ;set fire_list n-values 0[0]
   ask patch random-pycor random-pxcor [
     set pcolor red
-    set fire_list lput self fire_list
   ]
+  set fire_list patches with [pcolor = red]
 end
 
 to spread_fire
   set aux_list n-values 0[0]
-    foreach fire_list [
-      ifelse pycor mod 2 = 0
+    ask fire_list [
+      ifelse (pycor mod 2 = 0)
         [
           ;ask xcor - 1 pycor + 1 [set lput self aux_list]
-          ask patch pxcor pycor [set aux_list lput self aux_list]
+           ask patch pxcor pycor [set pcolor red]
           ;ask pxcor + 1 pycor lput self aux_list
 
         ]
@@ -54,6 +55,7 @@ to spread_fire
           ;ask pxcor + 1 pycor + 1 lput self aux_list
         ]
     ]
+;    set fire_list lput aux_list fire_list
 end
 
 
