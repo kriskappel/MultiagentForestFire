@@ -39,23 +39,29 @@ to start_fire
 end
 
 to spread_fire
-  set aux_list n-values 0[0]
+  ;set aux_list patches with [pcolor = red]
     ask fire_list [
       ifelse (pycor mod 2 = 0)
-        [
-          ;ask xcor - 1 pycor + 1 [set lput self aux_list]
-           ask patch pxcor pycor [set pcolor red]
-          ;ask pxcor + 1 pycor lput self aux_list
-
+        [  ; Quando ele tem o y par
+          ask patch (pxcor - 1) (pycor) [set pcolor red] ;(-1, 0)
+          ask patch (pxcor - 1) (pycor + 1) [set pcolor red]; (-1, 1)
+          ask patch (pxcor) (pycor + 1) [set pcolor red]; (0, 1)
+          ask patch (pxcor + 1) (pycor) [set pcolor red]; (1, 0)
+          ask patch (pxcor) (pycor - 1) [set pcolor red]; (0, -1)
+          ask patch (pxcor - 1) (pycor - 1) [set pcolor red]; (-1, -1)
+          ask patch (pxcor - 2) (pycor + 1) [set pcolor red]; (-2, 1)
+          ask patch (pxcor) (pycor + 2) [set pcolor red]; (0, 2)
+          ask patch (pxcor + 1) (pycor + 1) [set pcolor red]; (1, 1)
+          ask patch (pxcor) (pycor - 2) [set pcolor red]; (
         ]
 
         [
           ;ask pxcor - 1 pycor lput self aux_list
-          ;ask pxcor pycor + 1 lput self aux_list
+          ask patch pxcor (pycor + 1) [set pcolor red]
           ;ask pxcor + 1 pycor + 1 lput self aux_list
         ]
     ]
-;    set fire_list lput aux_list fire_list
+    set fire_list patches with [pcolor = red]
 end
 
 
