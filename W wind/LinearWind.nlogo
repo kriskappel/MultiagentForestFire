@@ -15,9 +15,12 @@ to setup
 end
 
 to go
+  if ticks mod 100000 = 0
+  [
   ifelse ticks = 0
     [start_fire]
     [spread_fire]
+  ]
    tick
 end
 
@@ -34,6 +37,7 @@ to start_fire
   ;set fire_list n-values 0[0]
   ask patch random-pycor random-pxcor [
     set pcolor red
+    set plabel 1
   ]
   set fire_list patches with [pcolor = red]
 end
@@ -52,40 +56,37 @@ to spread_fire
           ask patch (pxcor - 2) (pycor + 1) [set pcolor red]; (-2, 1)
           ask patch (pxcor) (pycor + 2) [set pcolor red]; (0, 2)
           ask patch (pxcor + 1) (pycor + 1) [set pcolor red]; (1, 1)
-          ask patch (pxcor) (pycor - 2) [set pcolor red]; (
+          ask patch (pxcor + 1) (pycor + 1) [set pcolor red]; (1, -1)
+          ask patch (pxcor) (pycor - 2) [set pcolor red]; (0, -2)
+          ask patch (pxcor - 2) (pycor + 1) [set pcolor red]; (-2, -1)
         ]
 
-        [
-          ;ask pxcor - 1 pycor lput self aux_list
-          ask patch pxcor (pycor + 1) [set pcolor red]
+        [ ; Quando ele tem o y impar
+          ask patch (pxcor - 1) (pycor) [set pcolor red] ;(-1, 0)
+          ask patch (pxcor) (pycor + 1) [set pcolor red]; (0, 1)
+          ask patch (pxcor + 1) (pycor + 1) [set pcolor red]; (1, 1)
+          ask patch (pxcor + 1) (pycor) [set pcolor red]; (1, 0)
+          ask patch (pxcor + 1) (pycor - 1) [set pcolor red]; (1, -1)
+          ask patch (pxcor) (pycor - 1) [set pcolor red]; (0, -1)
+          ask patch (pxcor - 1) (pycor + 1) [set pcolor red]; (-1, 1)
+          ask patch (pxcor) (pycor + 2) [set pcolor red]; (0, 2)
+          ask patch (pxcor + 2) (pycor + 1) [set pcolor red]; (2, 1)
+          ask patch (pxcor + 2) (pycor - 1) [set pcolor red]; (2, -1)
+          ask patch (pxcor) (pycor - 2) [set pcolor red]; (0, -2)
+          ask patch (pxcor - 1) (pycor - 1) [set pcolor red]; (-1, -1)
           ;ask pxcor + 1 pycor + 1 lput self aux_list
         ]
     ]
     set fire_list patches with [pcolor = red]
 end
-
-
-
-    ;let i 0
-    ;let j 0
-    ;repeat pxcor + 1[
-    ;  set j 0
-    ;  repeat pycor + 1[
-    ;    ask patch i j [set pcolor green]
-    ;    set j j + 1
-    ;  ]
-    ;  set i i + 1
-    ;]
-    ;max-pxcor
-    ;max-pycor
 @#$#@#$#@
 GRAPHICS-WINDOW
 210
 10
-675
-496
-17
-17
+1039
+860
+31
+31
 13.0
 1
 10
@@ -96,10 +97,10 @@ GRAPHICS-WINDOW
 1
 1
 1
--17
-17
--17
-17
+-31
+31
+-31
+31
 0
 0
 1
