@@ -15,7 +15,7 @@ to setup
 end
 
 to go
-  if ticks mod 100000 = 0
+  if ticks mod 10000 = 0
   [
   ifelse ticks = 0
     [start_fire]
