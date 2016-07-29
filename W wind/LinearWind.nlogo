@@ -1,11 +1,14 @@
 patches-own [
   wind
   rate
+  burned
 ]
 
 globals [
   fire_list
   aux_list
+  near_neighborhood
+  distant _neighborhood
 ]
 
 to setup
@@ -27,9 +30,10 @@ end
 to setup-patches
   ask patches[
     set wind 0
-    ;set plabel pycor
-    set plabel wind
-    set pcolor green
+    set rate 1
+    set burned 0
+    set plabel burned
+    set pcolor lime
   ]
 end
 
@@ -37,7 +41,9 @@ to start_fire
   ;set fire_list n-values 0[0]
   ask patch random-pycor random-pxcor [
     set pcolor red
-    set plabel 1
+    set burned 1
+    set plabel burned
+    ;set rate 1
   ]
   set fire_list patches with [pcolor = red]
 end
@@ -47,46 +53,108 @@ to spread_fire
     ask fire_list [
       ifelse (pycor mod 2 = 0)
         [  ; Quando ele tem o y par
-          ask patch (pxcor - 1) (pycor) [set pcolor red] ;(-1, 0)
-          ask patch (pxcor - 1) (pycor + 1) [set pcolor red]; (-1, 1)
-          ask patch (pxcor) (pycor + 1) [set pcolor red]; (0, 1)
-          ask patch (pxcor + 1) (pycor) [set pcolor red]; (1, 0)
-          ask patch (pxcor) (pycor - 1) [set pcolor red]; (0, -1)
-          ask patch (pxcor - 1) (pycor - 1) [set pcolor red]; (-1, -1)
-          ask patch (pxcor - 2) (pycor + 1) [set pcolor red]; (-2, 1)
-          ask patch (pxcor) (pycor + 2) [set pcolor red]; (0, 2)
-          ask patch (pxcor + 1) (pycor + 1) [set pcolor red]; (1, 1)
-          ask patch (pxcor + 1) (pycor + 1) [set pcolor red]; (1, -1)
-          ask patch (pxcor) (pycor - 2) [set pcolor red]; (0, -2)
-          ask patch (pxcor - 2) (pycor + 1) [set pcolor red]; (-2, -1)
+          ask patch (pxcor - 1) (pycor) [set pcolor red set burned 1 set plabel burned] ;(-1, 0)
+          ask patch (pxcor - 1) (pycor + 1) [set pcolor red set burned 1 set plabel burned]; (-1, 1)
+          ask patch (pxcor) (pycor + 1) [set pcolor red set burned 1 set plabel burned]; (0, 1)
+          ask patch (pxcor + 1) (pycor) [set pcolor red set burned 1 set plabel burned]; (1, 0)
+          ask patch (pxcor) (pycor - 1) [set pcolor red set burned 1 set plabel burned]; (0, -1)
+          ask patch (pxcor - 1) (pycor - 1) [set pcolor red set burned 1 set plabel burned]; (-1, -1)
+          ;the patches above are the near neighbors
+
+          ask patch (pxcor - 2) (pycor + 1) [ set rate (calculate_rate rate) change_color rate]; (-2, 1)
+          ask patch (pxcor) (pycor + 2) [ set rate (calculate_rate rate)  change_color rate]; (0, 2)
+          ask patch (pxcor + 1) (pycor + 1) [ set rate (calculate_rate rate)  change_color rate]; (1, 1)
+          ask patch (pxcor + 1) (pycor + 1) [ set rate (calculate_rate rate)  change_color rate]; (1, -1)
+          ask patch (pxcor) (pycor - 2) [ set rate (calculate_rate rate)  change_color rate]; (0, -2)
+          ask patch (pxcor - 2) (pycor + 1) [ set rate (calculate_rate rate)  change_color rate]; (-2, -1)
         ]
 
         [ ; Quando ele tem o y impar
-          ask patch (pxcor - 1) (pycor) [set pcolor red] ;(-1, 0)
-          ask patch (pxcor) (pycor + 1) [set pcolor red]; (0, 1)
-          ask patch (pxcor + 1) (pycor + 1) [set pcolor red]; (1, 1)
-          ask patch (pxcor + 1) (pycor) [set pcolor red]; (1, 0)
-          ask patch (pxcor + 1) (pycor - 1) [set pcolor red]; (1, -1)
-          ask patch (pxcor) (pycor - 1) [set pcolor red]; (0, -1)
-          ask patch (pxcor - 1) (pycor + 1) [set pcolor red]; (-1, 1)
-          ask patch (pxcor) (pycor + 2) [set pcolor red]; (0, 2)
-          ask patch (pxcor + 2) (pycor + 1) [set pcolor red]; (2, 1)
-          ask patch (pxcor + 2) (pycor - 1) [set pcolor red]; (2, -1)
-          ask patch (pxcor) (pycor - 2) [set pcolor red]; (0, -2)
-          ask patch (pxcor - 1) (pycor - 1) [set pcolor red]; (-1, -1)
+          ask patch (pxcor - 1) (pycor) [set pcolor red set burned 1 set plabel burned] ;(-1, 0)
+          ask patch (pxcor) (pycor + 1) [set pcolor red set burned 1 set plabel burned]; (0, 1)
+          ask patch (pxcor + 1) (pycor + 1) [set pcolor red set burned 1 set plabel burned]; (1, 1)
+          ask patch (pxcor + 1) (pycor) [set pcolor red set burned 1 set plabel burned]; (1, 0)
+          ask patch (pxcor + 1) (pycor - 1) [set pcolor red set burned 1 set plabel burned]; (1, -1)
+          ask patch (pxcor) (pycor - 1) [set pcolor red set burned 1 set plabel burned]; (0, -1)
+          ;the patches above are the near neighbors
+
+          ask patch (pxcor - 1) (pycor + 1) [set rate (calculate_rate rate)  change_color rate]; (-1, 1)
+          ask patch (pxcor) (pycor + 2) [set rate (calculate_rate rate)  change_color rate]; (0, 2)
+          ask patch (pxcor + 2) (pycor + 1) [set rate (calculate_rate rate)  change_color rate]; (2, 1)
+          ask patch (pxcor + 2) (pycor - 1) [set rate (calculate_rate rate)  change_color rate]; (2, -1)
+          ask patch (pxcor) (pycor - 2) [set rate (calculate_rate rate)  change_color rate]; (0, -2)
+          ask patch (pxcor - 1) (pycor - 1) [set rate (calculate_rate rate)  change_color rate]; (-1, -1)
           ;ask pxcor + 1 pycor + 1 lput self aux_list
         ]
     ]
     set fire_list patches with [pcolor = red]
 end
+
+to-report calculate_rate [patch_rate]
+  let aux_rate patch_rate
+  let aux_burned (sqrt 3) / aux_rate
+  let result aux_burned / ((3 * (sqrt 3)) / 2)
+  set result result + patch_rate
+  ifelse result > 1
+  [ report 1 ]
+  [ report result ]
+end
+
+to change_color [patch1]
+  ifelse [rate] of patch1 > 0.95
+  [set color red]
+  [
+    ifelse [rate] of patch1 > 0.85
+    [set color orange]
+    [
+      ifelse [rate] of patch1 > 0.75
+      [set color 23]
+      [
+        ifelse [rate] of patch1 > 0.65
+        [set color 41]
+        [
+          ifelse [rate] of patch1 > 0.55
+          [set color 43]
+          [
+            ifelse [rate] of patch1 > 0.45
+            [set color yellow]
+            [
+              ifelse [rate] of patch1 > 0.35
+              [set color green]
+              [
+                ifelse [rate] of patch1 > 0.25
+                [set color 51]
+                [
+                  ifelse [rate] of patch1 > 0.15
+                  [set color 61]
+                  [
+                    ifelse [rate] of patch1 > 0.05
+                    [set color 63]
+                    [set color lime]
+                  ]
+                ]
+              ]
+            ]
+          ]
+        ]
+      ]
+    ]
+  ]
+end
+
+
+
+
+
+
 @#$#@#$#@
 GRAPHICS-WINDOW
 210
 10
-1039
-860
-31
-31
+961
+444
+28
+15
 13.0
 1
 10
@@ -94,13 +162,13 @@ GRAPHICS-WINDOW
 1
 1
 0
+0
+0
 1
-1
-1
--31
-31
--31
-31
+-28
+28
+-15
+15
 0
 0
 1
