@@ -9,6 +9,7 @@ globals [
   aux_list
   near_neighborhood
   distant _neighborhood
+  flag_burned
 ]
 
 to setup
@@ -18,13 +19,17 @@ to setup
 end
 
 to go
+  ;futuramente mudar, time step só atualiza
+  ;quando um vizinho está totalmente queimado
   if ticks mod 10000 = 0
   [
+  ;set flag_burned 0
   ifelse ticks = 0
     [start_fire]
     [spread_fire]
+    ;if flag_burned = 1 [ tick ]
   ]
-   tick
+  tick
 end
 
 to setup-patches
@@ -46,11 +51,13 @@ to start_fire
     ;set rate 1
   ]
   set fire_list patches with [pcolor = red]
+  set flag_burned 1
 end
 
 to spread_fire
   ;set aux_list patches with [pcolor = red]
     ask fire_list [
+      let centerCell_rate rate
       ifelse (pycor mod 2 = 0)
         [  ; Quando ele tem o y par
           ask patch (pxcor - 1) (pycor) [set pcolor red set burned 1 set plabel burned] ;(-1, 0)
@@ -61,12 +68,12 @@ to spread_fire
           ask patch (pxcor - 1) (pycor - 1) [set pcolor red set burned 1 set plabel burned]; (-1, -1)
           ;the patches above are the near neighbors
 
-          ask patch (pxcor - 2) (pycor + 1) [ set burned (calculate_rate rate burned)  set plabel burned set pcolor (change_color burned)]; (-2, 1)
-          ask patch (pxcor) (pycor + 2)     [ set burned (calculate_rate rate burned)  set plabel burned set pcolor (change_color burned)]; (0, 2)
-          ask patch (pxcor + 1) (pycor + 1) [ set burned (calculate_rate rate burned)  set plabel burned set pcolor (change_color burned)]; (1, 1)
-          ask patch (pxcor + 1) (pycor + 1) [ set burned (calculate_rate rate burned)  set plabel burned set pcolor (change_color burned)]; (1, -1)
-          ask patch (pxcor) (pycor - 2)     [ set burned (calculate_rate rate burned)  set plabel burned set pcolor (change_color burned)]; (0, -2)
-          ask patch (pxcor - 2) (pycor + 1) [ set burned (calculate_rate rate burned)  set plabel burned set pcolor (change_color burned)]; (-2, -1)
+          ask patch (pxcor - 2) (pycor + 1) [ set burned (calculate_rate centerCell_rate burned)  set plabel burned set pcolor (change_color burned)]; (-2, 1)
+          ask patch (pxcor) (pycor + 2)     [ set burned (calculate_rate centerCell_rate burned)  set plabel burned set pcolor (change_color burned)]; (0, 2)
+          ask patch (pxcor + 1) (pycor + 1) [ set burned (calculate_rate centerCell_rate burned)  set plabel burned set pcolor (change_color burned)]; (1, 1)
+          ask patch (pxcor + 1) (pycor - 1) [ set burned (calculate_rate centerCell_rate burned)  set plabel burned set pcolor (change_color burned)]; (1, -1)
+          ask patch (pxcor) (pycor - 2)     [ set burned (calculate_rate centerCell_rate burned)  set plabel burned set pcolor (change_color burned)]; (0, -2)
+          ask patch (pxcor - 2) (pycor - 1) [ set burned (calculate_rate centerCell_rate burned)  set plabel burned set pcolor (change_color burned)]; (-2, -1)
         ]
 
         [ ; Quando ele tem o y impar
@@ -78,16 +85,16 @@ to spread_fire
           ask patch (pxcor) (pycor - 1) [set pcolor red set burned 1 set plabel burned]; (0, -1)
           ;the patches above are the near neighbors
 
-          ask patch (pxcor - 1) (pycor + 1) [set burned (calculate_rate rate burned)  set plabel burned set pcolor (change_color burned)]; (-1, 1)
-          ask patch (pxcor) (pycor + 2)     [set burned (calculate_rate rate burned)  set plabel burned set pcolor (change_color burned)]; (0, 2)
-          ask patch (pxcor + 2) (pycor + 1) [set burned (calculate_rate rate burned)  set plabel burned set pcolor (change_color burned)]; (2, 1)
-          ask patch (pxcor + 2) (pycor - 1) [set burned (calculate_rate rate burned)  set plabel burned set pcolor (change_color burned)]; (2, -1)
-          ask patch (pxcor) (pycor - 2)     [set burned (calculate_rate rate burned)  set plabel burned set pcolor (change_color burned)]; (0, -2)
-          ask patch (pxcor - 1) (pycor - 1) [set burned (calculate_rate rate burned)  set plabel burned set pcolor (change_color burned)]; (-1, -1)
+          ask patch (pxcor - 1) (pycor + 1) [set burned (calculate_rate centerCell_rate burned)  set plabel burned set pcolor (change_color burned)]; (-1, 1)
+          ask patch (pxcor) (pycor + 2)     [set burned (calculate_rate centerCell_rate burned)  set plabel burned set pcolor (change_color burned)]; (0, 2)
+          ask patch (pxcor + 2) (pycor + 1) [set burned (calculate_rate centerCell_rate burned)  set plabel burned set pcolor (change_color burned)]; (2, 1)
+          ask patch (pxcor + 2) (pycor - 1) [set burned (calculate_rate centerCell_rate burned)  set plabel burned set pcolor (change_color burned)]; (2, -1)
+          ask patch (pxcor) (pycor - 2)     [set burned (calculate_rate centerCell_rate burned)  set plabel burned set pcolor (change_color burned)]; (0, -2)
+          ask patch (pxcor - 1) (pycor - 1) [set burned (calculate_rate centerCell_rate burned)  set plabel burned set pcolor (change_color burned)]; (-1, -1)
           ;ask pxcor + 1 pycor + 1 lput self aux_list
         ]
     ]
-    set fire_list patches with [pcolor = red]
+    set fire_list patches with [ burned > 0]
 end
 
 to-report calculate_rate [patch_rate patch_burn]
@@ -95,9 +102,11 @@ to-report calculate_rate [patch_rate patch_burn]
   let aux_burned (sqrt 3) / aux_rate
   let result aux_burned / ((3 * (sqrt 3)) / 2)
   set result result + patch_burn
-  ifelse result > 1
+  ifelse result >= 1
   [ report 1 ]
-  [ report result ]
+    ;set flag_burned 1 ]
+  ;let result 0.2
+  [report result]
 end
 
 to-report change_color [patch_burn]
@@ -145,7 +154,6 @@ to-report change_color [patch_burn]
     ]
   ]
 end
-
 
 
 
