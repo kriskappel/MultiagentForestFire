@@ -98,13 +98,17 @@ to spread_fire
 end
 
 to-report calculate_rate [patch_rate patch_burn]
-  let aux_rate patch_rate
-  let aux_burned (sqrt 3) / aux_rate
-  let result aux_burned / ((3 * (sqrt 3)) / 2)
-  set result result + patch_burn
+  let burnedOut (pi * ((sqrt 3  - patch_rate ) * (sqrt 3 - patch_rate )) * ((2 * pi) / 3)) / 2 * pi
+  let stateT1 burnedOut / ((3 * sqrt 3) / 2)
+  ;let aux_rate patch_rate
+  ;let aux_burned (sqrt 3) / aux_rate
+  ;let result aux_burned / ((3 * (sqrt 3)) / 2)
+  let result stateT1 + patch_burn
+  set result result / 10
+
   ifelse result >= 1
   [ report 1 ]
-    ;set flag_burned 1 ]
+  ;  ;set flag_burned 1 ]
   ;let result 0.2
   [report result]
 end
@@ -154,7 +158,6 @@ to-report change_color [patch_burn]
     ]
   ]
 end
-
 
 
 
